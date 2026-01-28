@@ -1,0 +1,21 @@
+=== Starting OPD Simulation (3 Doctor Scenario) ===
+
+-> Setting up 3 Doctors...
+-> Doctors Setup Complete: Smith, Jones, Strange
+
+-> [Dr. Smith] Booking mixed sources...
+   [s1-1] (3/3): Charlie (Paid) (50), Alice (Online) (10), Bob (Walkin) (10)
+
+-> [Dr. Smith] Emergency Arrives (Slot Full)...
+   Outcome: ACCEPTED (Slot: s1-2)
+   [s1-1] (3/3): Charlie (Paid) (50), Alice (Online) (10), Bob (Walkin) (10)
+
+-> [Dr. Jones] Reporting 15 min delay...
+   Dr. Jones Schedule Updated:
+   Slot s2-1: 09:15 - 10:15 (DELAYED)
+   Slot s2-2: 10:15 - 11:15 (DELAYED)
+
+-> [Dr. Strange] Filling Capacity...
+   User 3 (Walkin) Outcome: REJECTED (Full)
+
+=== Simulation Complete ===

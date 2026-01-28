@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPD Token Engine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --bg-gradient: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            --header-bg: #ffffff;
+            --card-bg: #ffffff;
+            --text-main: #111827;
+            --text-sub: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Header */
+        header {
+            background: var(--header-bg);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            z-index: 10;
+        }
+
+        .brand h1 {
+            font-size: 1.5rem;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Layout */
+        .main-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar Nav */
+        nav {
+            width: 250px;
+            background: #fff;
+            border-right: 1px solid var(--border);
+            padding: 1.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        nav button {
+            background: transparent;
+            border: none;
+            padding: 12px 16px;
+            text-align: left;
+            font-size: 1rem;
+            color: var(--text-sub);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        nav button:hover {
+            background: #f9fafb;
+            color: var(--text-main);
+        }
+
+        nav button.active {
+            background: #e0e7ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* Content Area */
+        main {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .view-section {
+            display: none;
+            max-width: 900px;
+            margin: 0 auto;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: 0;
+            }
+        }
+
+        h2 {
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 0.5rem;
+        }
+
+        /* Forms */
+        .card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            margin-bottom: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-full {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-main);
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary);
+            ring: 2px solid var(--primary-light);
+        }
+
+        button.btn-primary {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            width: 100%;
+        }
+
+        button.btn-primary:hover {
+            opacity: 0.9;
+        }
+
+        /* Dashboard Styles */
+        .doc-card {
+            margin-bottom: 2rem;
+        }
+
+        .doc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #e0e7ff;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .slots-container {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .slot-card {
+            min-width: 200px;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: #f9fafb;
+            position: relative;
+        }
+
+        .slot-card.delayed {
+            border-color: #fca5a5;
+            background: #fef2f2;
+        }
+
+        .slot-time {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .token-list {
+            list-style: none;
+            margin-top: 0.5rem;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .token-item {
+            font-size: 0.85rem;
+            padding: 4px 0;
+            border-bottom: 1px dashed #e5e5e5;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* Feedback */
+        #notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: #10b981;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(100px);
+            transition: transform 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            z-index: 100;
+        }
+
+        #notification.show {
+            transform: translateY(0);
+        }
+
+        #notification.error {
+            background: #ef4444;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">
+            <h1>OPD Manager</h1>
+        </div>
+        <div style="font-size: 0.875rem; color: #6b7280;">Live Demo</div>
+    </header>
+
+    <div class="main-layout">
+        <nav>
+            <button onclick="switchTab('dashboard')" class="active" id="nav-dashboard">Dashboard</button>
+            <button onclick="switchTab('booking')" id="nav-booking">Book Token</button>
+            <button onclick="switchTab('doctors')" id="nav-doctors">Manage Doctors</button>
+            <button onclick="switchTab('ops')" id="nav-ops">Operations</button>
+        </nav>
+
+        <main>
+            <!-- 1. DASHBOARD -->
+            <section id="view-dashboard" class="view-section active">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                    <h2>Live Status</h2>
+                    <button onclick="fetchDashboard()"
+                        style="padding: 6px 12px; background: white; border: 1px solid #ccc; border-radius: 4px; cursor: pointer;">Refresh</button>
+                </div>
+                <div id="dashboard-content">
+                    Loading...
+                </div>
+            </section>
+
+            <!-- 2. BOOKING -->
+            <section id="view-booking" class="view-section">
+                <h2>Book Appointment</h2>
+                <div class="card">
+                    <form id="bookingForm" onsubmit="handleBook(event)" autocomplete="off">
+                        <div class="form-grid">
+                            <div>
+                                <label>Select Doctor</label>
+                                <select id="book_doctorId" required></select>
+                            </div>
+                            <div>
+                                <label>Source</label>
+                                <select id="book_source">
+                                    <option value="ONLINE">Online</option>
+                                    <option value="WALKIN">Walk-in</option>
+                                    <option value="PAID">Paid</option>
+                                    <option value="PRIORITY">Priority</option>
+                                    <option value="EMERGENCY">Emergency</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-guide">
+                            <label>Patient Name</label>
+                            <input type="text" id="book_patient" placeholder="Full Name" required>
+                        </div>
+                        <button type="submit" class="btn-primary">Book Token</button>
+                    </form>
+                </div>
+                <div id="bookingResult"></div>
+            </section>
+
+            <!-- 3. DOCTORS -->
+            <section id="view-doctors" class="view-section">
+                <h2>Add New Doctor</h2>
+                <div class="card">
+                    <form id="doctorForm" onsubmit="handleAddDoctor(event)" autocomplete="off">
+                        <div class="form-grid">
+                            <div>
+                                <label>Doctor ID</label>
+                                <input type="text" id="doc_id" placeholder="e.g. doc3" required>
+                            </div>
+                            <div>
+                                <label>Name</label>
+                                <input type="text" id="doc_name" placeholder="e.g. Dr. Strange" required>
+                            </div>
+                        </div>
+                        <label>Specialty</label>
+                        <input type="text" id="doc_specialty" placeholder="e.g. Neurology">
+
+                        <label>Initial Slot (Optional)</label>
+                        <div class="form-grid">
+                            <input type="time" id="doc_slot_start" value="09:00">
+                            <input type="time" id="doc_slot_end" value="10:00">
+                        </div>
+
+                        <button type="submit" class="btn-primary">Create Doctor</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 4. OPERATIONS (Delay/Cancel) -->
+            <section id="view-ops" class="view-section">
+                <h2>Operations</h2>
+
+                <div class="card">
+                    <h3>Report Delay</h3>
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Delays will shift subsequent slots
+                        automatically.</p>
+                    <form onsubmit="handleDelay(event)" autocomplete="off">
+                        <div class="form-grid">
+                            <div>
+                                <label>Doctor</label>
+                                <select id="ops_delay_doctor" required
+                                    onchange="populateSlots('ops_delay_doctor', 'ops_delay_slot')"></select>
+                            </div>
+                            <div>
+                                <label>Slot</label>
+                                <select id="ops_delay_slot" required></select>
+                            </div>
+                        </div>
+                        <label>Delay (Minutes)</label>
+                        <input type="number" id="ops_delay_mins" value="15" min="1" required>
+
+                        <button type="submit" class="btn-primary" style="background: #f59e0b;">Report Delay</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3>Cancel Token</h3>
+                    <p style="margin-bottom: 1rem; color: #666; font-size: 0.9rem;">Remove a specific token from a slot.
+                    </p>
+                    <form onsubmit="handleCancel(event)" autocomplete="off">
+                        <div class="form-grid">
+                            <div>
+                                <label>Doctor</label>
+                                <select id="ops_cancel_doctor" required
+                                    onchange="populateSlots('ops_cancel_doctor', 'ops_cancel_slot')"></select>
+                            </div>
+                            <div>
+                                <label>Slot</label>
+                                <select id="ops_cancel_slot" required></select>
+                            </div>
+                        </div>
+                        <label>Token Index (0 = 1st person)</label>
+                        <input type="number" id="ops_cancel_idx" placeholder="0" min="0" required>
+
+                        <button type="submit" class="btn-primary" style="background: #ef4444;">Cancel Token</button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <div id="notification"></div>
+
+    <script src="app.js"></script>
+
+</body>
+
+</html>
