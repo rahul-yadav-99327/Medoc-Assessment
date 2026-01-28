@@ -146,3 +146,34 @@ Tokens within a slot are sorted first by **Priority Score (Descending)**, then b
 When a delay is reported for a slot:
 1.  That slot's *End Time* is shifted.
 2.  **All absolute subsequent slots** for that doctor are shifted by the same duration to maintain the schedule gap.
+
+## ⚠️ Edge Cases & Failure Handling
+
+The system is designed to be robust, but specific logical boundaries exist to maintain scheduling integrity:
+
+### 1. Emergency Overflows
+- **Scenario**: A patient arrives with `EMERGENCY` status, but all slots are full.
+- **Handling**: The system **bypasses hard limits**. The emergency token is forced into the **first available slot** (Slot 0), allowing capacity to exceed the configured limit (e.g., 6/5).
+
+### 2. Time Shifts & Delays
+- **Scenario**: A doctor reports a delay (e.g., 45 mins).
+- **Handling**:
+    - The delayed slot's end time is extended.
+    - **All absolute subsequent slots** are shifted forward by the same duration to preserve breaks/gaps.
+    - **Note**: Delays crossing midnight (23:59 -> 00:45) wrap along with the time but do not change dates (as the system operates on a 24h cycle).
+
+### 3. Priority Bumping (Smart Allocation)
+- **Scenario**: A high-priority patient (`PAID`) arrives, but the desired slot is full of lower-priority (`WALKIN`) patients.
+- **Handling**: Use of a "Bump" mechanic:
+    - The system identifies the lowest priority token in the current slot.
+    - It attempts to **move that lower-priority token to the next slot**.
+    - If the next slot has space, the move occurs, and the high-priority patient takes the current spot.
+    - If the next slot is also full, the specialized request is rejected (unless Emergency).
+
+### 4. API Error Responses
+- **Scenario**: Invalid Doctor ID, Slot ID, or missing parameters.
+- **Handling**: The API returns standard JSON error responses:
+    ```json
+    { "success": false, "message": "Doctor not found" }
+    ```
+    - The frontend gracefully catches these and displays a **toast notification** to the user.
